@@ -1,0 +1,917 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AlienHouse Networks | Hyper-Advanced Digital Ecosystems</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700;900&family=Rajdhani:wght@300;400;500;600;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+    
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        alien: {
+                            DEFAULT: '#00ff41', 
+                            dim: '#008F11',
+                            glow: '#39ff14',
+                            dark: '#020202',
+                            panel: 'rgba(10, 20, 10, 0.95)'
+                        }
+                    },
+                    fontFamily: {
+                        orbitron: ['Orbitron', 'sans-serif'],
+                        rajdhani: ['Rajdhani', 'sans-serif'],
+                        mono: ['Share Tech Mono', 'monospace'],
+                    },
+                    backgroundImage: {
+                        'grid-pattern': "linear-gradient(to right, #00ff4105 1px, transparent 1px), linear-gradient(to bottom, #00ff4105 1px, transparent 1px)",
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        /* --- CORE PHYSICS & AESTHETICS --- */
+        body {
+            background-color: #020202;
+            color: #e0ffe0;
+            overflow-x: hidden;
+            cursor: crosshair;
+        }
+
+        /* Holographic Scrollbar */
+        ::-webkit-scrollbar { width: 6px; background: #000; }
+        ::-webkit-scrollbar-thumb { background: #00ff41; box-shadow: 0 0 10px #00ff41; }
+
+        /* HUD Elements */
+        .hud-corner {
+            position: absolute; width: 20px; height: 20px;
+            border: 2px solid #00ff41; transition: all 0.3s;
+        }
+        .hud-tl { top: 0; left: 0; border-right: 0; border-bottom: 0; }
+        .hud-tr { top: 0; right: 0; border-left: 0; border-bottom: 0; }
+        .hud-bl { bottom: 0; left: 0; border-right: 0; border-top: 0; }
+        .hud-br { bottom: 0; right: 0; border-left: 0; border-top: 0; }
+
+        .alien-card:hover .hud-corner { width: 100%; height: 100%; opacity: 0.1; background: #00ff41; }
+
+        /* Mega Menu Animations */
+        .mega-menu {
+            display: none;
+            opacity: 0;
+            transform: translateY(-10px);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            pointer-events: none;
+        }
+        .group:hover .mega-menu {
+            display: block;
+            opacity: 1;
+            transform: translateY(0);
+            pointer-events: auto;
+        }
+
+        /* Glitch Text */
+        .glitch-hover:hover {
+            animation: glitch-skew 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94) both infinite;
+            color: #00ff41;
+            text-shadow: 2px 0 #ff00c1, -2px 0 #00fff9;
+        }
+        @keyframes glitch-skew {
+            0% { transform: skew(0deg); }
+            20% { transform: skew(-10deg); }
+            40% { transform: skew(10deg); }
+            60% { transform: skew(-5deg); }
+            80% { transform: skew(5deg); }
+            100% { transform: skew(0deg); }
+        }
+
+        /* Map Filter */
+        .alien-map iframe {
+            filter: grayscale(100%) invert(92%) hue-rotate(100deg) contrast(120%) brightness(90%);
+            pointer-events: none; /* Enable on click via JS */
+        }
+
+        /* Scifi Grid Background */
+        .sci-grid {
+            background-size: 40px 40px;
+            mask-image: radial-gradient(circle at center, black, transparent 80%);
+        }
+    </style>
+</head>
+<body class="font-rajdhani selection:bg-alien selection:text-black">
+
+    <canvas id="particle-canvas" class="fixed inset-0 z-[-1] pointer-events-none"></canvas>
+    <div class="fixed inset-0 bg-grid-pattern sci-grid z-[-1] opacity-20"></div>
+
+    <nav class="fixed w-full z-50 top-0 bg-alien-dark/90 backdrop-blur-xl border-b border-alien/20">
+        <div class="max-w-[1920px] mx-auto px-6">
+            <div class="flex items-center justify-between h-20">
+                <div class="flex items-center gap-3 group cursor-pointer relative z-50">
+                    <div class="relative">
+                        <i data-lucide="zap" class="h-8 w-8 text-alien group-hover:animate-pulse"></i>
+                        <div class="absolute -inset-2 bg-alien/20 rounded-full blur opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                    </div>
+                    <span class="font-orbitron font-bold text-2xl tracking-wider text-white">ALIEN<span class="text-alien">HOUSE</span></span>
+                </div>
+
+                <div class="hidden xl:flex items-center h-full">
+                    <div class="flex h-full">
+                        
+                        <div class="group relative h-full flex items-center px-6 cursor-pointer border-l border-alien/5 hover:bg-alien/5 transition-colors">
+                            <span class="text-gray-300 group-hover:text-alien font-orbitron text-sm tracking-widest flex items-center gap-2">
+                                COMPANY <i data-lucide="chevron-down" class="w-3 h-3 transition-transform group-hover:rotate-180"></i>
+                            </span>
+                            <div class="mega-menu absolute top-20 left-0 w-[600px] bg-alien-dark border border-alien/30 p-8 shadow-[0_20px_50px_rgba(0,255,65,0.1)]">
+                                <div class="grid grid-cols-2 gap-8">
+                                    <div>
+                                        <h4 class="text-alien font-bold mb-4 border-b border-alien/20 pb-2">WHO WE ARE</h4>
+                                        <ul class="space-y-2 text-sm text-gray-400 font-mono">
+                                            <li class="hover:text-white hover:translate-x-2 transition-transform cursor-pointer">>> About Us Overview</li>
+                                            <li class="hover:text-white hover:translate-x-2 transition-transform cursor-pointer">>> Our History (Timeline)</li>
+                                            <li class="hover:text-white hover:translate-x-2 transition-transform cursor-pointer">>> Leadership Council</li>
+                                            <li class="hover:text-white hover:translate-x-2 transition-transform cursor-pointer">>> Mission & Values</li>
+                                        </ul>
+                                    </div>
+                                    <div>
+                                        <h4 class="text-alien font-bold mb-4 border-b border-alien/20 pb-2">CAREERS</h4>
+                                        <ul class="space-y-2 text-sm text-gray-400 font-mono">
+                                            <li class="hover:text-white hover:translate-x-2 transition-transform cursor-pointer">>> Why AlienHouse?</li>
+                                            <li class="hover:text-white hover:translate-x-2 transition-transform cursor-pointer">>> Diversity & Inclusion</li>
+                                            <li class="hover:text-white hover:translate-x-2 transition-transform cursor-pointer text-alien animate-pulse">>> OPEN POSITIONS [HOT]</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="group relative h-full flex items-center px-6 cursor-pointer border-l border-alien/5 hover:bg-alien/5 transition-colors">
+                            <span class="text-gray-300 group-hover:text-alien font-orbitron text-sm tracking-widest flex items-center gap-2">
+                                SERVICES <i data-lucide="chevron-down" class="w-3 h-3 transition-transform group-hover:rotate-180"></i>
+                            </span>
+                            <div class="mega-menu absolute top-20 -left-20 w-[900px] bg-alien-dark border border-alien/30 p-8 shadow-[0_20px_50px_rgba(0,255,65,0.1)] grid grid-cols-3 gap-8">
+                                <div>
+                                    <h4 class="text-white font-orbitron mb-4 flex items-center gap-2"><i data-lucide="cpu" class="text-alien w-4 h-4"></i> ENGINEERING</h4>
+                                    <ul class="space-y-2 text-gray-400 text-sm hover:text-alien">
+                                        <li class="border-b border-gray-800 py-1 hover:pl-2 transition-all cursor-pointer">Cloud Native Dev</li>
+                                        <li class="border-b border-gray-800 py-1 hover:pl-2 transition-all cursor-pointer">Legacy Modernization</li>
+                                        <li class="border-b border-gray-800 py-1 hover:pl-2 transition-all cursor-pointer">DevSecOps Pipelines</li>
+                                        <li class="border-b border-gray-800 py-1 hover:pl-2 transition-all cursor-pointer">Microservices Arch</li>
+                                    </ul>
+                                </div>
+                                <div>
+                                    <h4 class="text-white font-orbitron mb-4 flex items-center gap-2"><i data-lucide="brain" class="text-alien w-4 h-4"></i> INTELLIGENCE</h4>
+                                    <ul class="space-y-2 text-gray-400 text-sm hover:text-alien">
+                                        <li class="border-b border-gray-800 py-1 hover:pl-2 transition-all cursor-pointer">Generative AI (LLMs)</li>
+                                        <li class="border-b border-gray-800 py-1 hover:pl-2 transition-all cursor-pointer">Computer Vision</li>
+                                        <li class="border-b border-gray-800 py-1 hover:pl-2 transition-all cursor-pointer">Predictive Analytics</li>
+                                        <li class="border-b border-gray-800 py-1 hover:pl-2 transition-all cursor-pointer">Autonomous Agents</li>
+                                    </ul>
+                                </div>
+                                <div>
+                                    <h4 class="text-white font-orbitron mb-4 flex items-center gap-2"><i data-lucide="globe" class="text-alien w-4 h-4"></i> STRATEGY</h4>
+                                    <ul class="space-y-2 text-gray-400 text-sm hover:text-alien">
+                                        <li class="border-b border-gray-800 py-1 hover:pl-2 transition-all cursor-pointer">Digital Transformation</li>
+                                        <li class="border-b border-gray-800 py-1 hover:pl-2 transition-all cursor-pointer">CTO-as-a-Service</li>
+                                        <li class="border-b border-gray-800 py-1 hover:pl-2 transition-all cursor-pointer">Tech M&A Diligence</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+
+                        <a href="#rnd" class="group h-full flex items-center px-6 cursor-pointer border-l border-alien/5 hover:bg-alien/5 transition-colors text-gray-300 hover:text-alien font-orbitron text-sm tracking-widest">
+                            LABS / R&D
+                        </a>
+
+                        <div class="flex items-center ml-6">
+                            <a href="#contact" class="relative px-6 py-2 bg-alien text-black font-orbitron font-bold text-sm tracking-widest hover:bg-white transition-colors clip-path-button">
+                                CONTACT
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <header class="relative min-h-screen flex items-center justify-center overflow-hidden pt-20">
+        <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-alien/5 rounded-full blur-[100px] animate-pulse"></div>
+        
+        <div class="relative z-10 text-center px-4 max-w-6xl mx-auto">
+            <div class="mb-4 flex justify-center">
+                <div class="px-4 py-1 border border-alien/50 rounded-full bg-alien/10 text-alien text-xs font-mono flex items-center gap-2">
+                    <span class="w-2 h-2 bg-alien rounded-full animate-ping"></span>
+                    SYSTEM STATUS: OPTIMAL // 2025.Q4
+                </div>
+            </div>
+            
+            <h1 class="text-6xl md:text-8xl lg:text-9xl font-orbitron font-black text-white mb-8 leading-[0.9] tracking-tighter mix-blend-luminosity">
+                BEYOND<br>
+                <span class="text-transparent bg-clip-text bg-gradient-to-r from-alien via-emerald-400 to-cyan-500 decrypt-effect" data-value="HUMANITY">#@*&%$!</span>
+            </h1>
+            
+            <p class="text-xl md:text-2xl text-gray-400 max-w-3xl mx-auto font-light mb-10">
+                We engineer the <span class="text-alien font-bold">post-human enterprise</span>. Accelerating digital evolution through quantum-ready architecture and sentient AI.
+            </p>
+
+            <div class="flex flex-col sm:flex-row justify-center gap-6">
+                <button class="px-8 py-4 border border-alien bg-alien/10 text-alien hover:bg-alien hover:text-black font-orbitron font-bold tracking-widest transition-all duration-300 transform hover:scale-105 clip-path-slanted">
+                    INITIATE PROTOCOL
+                </button>
+                <button class="px-8 py-4 border border-gray-700 text-gray-300 hover:border-white hover:text-white font-orbitron tracking-widest transition-all">
+                    VIEW CAPABILITIES
+                </button>
+            </div>
+        </div>
+
+        <div class="absolute bottom-10 left-10 hidden md:block font-mono text-xs text-alien/50 space-y-1">
+            <p>COORD: 23.0225° N, 72.5714° E</p>
+            <p>MEM: 64TB / 128TB</p>
+            <p>NET: ENCRYPTED (AES-256)</p>
+        </div>
+    </header>
+    <section id="services" class="py-24 bg-alien-dark relative border-b border-alien/20">
+        <div class="absolute inset-0 grid grid-cols-6 gap-4 opacity-5 pointer-events-none">
+            <div class="border-r border-alien h-full"></div>
+            <div class="border-r border-alien h-full"></div>
+            <div class="border-r border-alien h-full"></div>
+            <div class="border-r border-alien h-full"></div>
+            <div class="border-r border-alien h-full"></div>
+        </div>
+
+        <div class="max-w-7xl mx-auto px-6 relative z-10">
+            <div class="text-center mb-20">
+                <div class="inline-block px-3 py-1 border border-alien/30 rounded text-alien text-xs font-mono mb-4 tracking-[0.2em]">
+                    CAPABILITY MATRIX_
+                </div>
+                <h2 class="text-4xl md:text-6xl font-orbitron font-bold text-white mb-4">
+                    OPERATIONAL <span class="text-alien">MODULES</span>
+                </h2>
+                <p class="text-gray-400 max-w-2xl mx-auto font-rajdhani text-lg">
+                    Comprehensive digital warfare suites designed to dominate market sectors. Select a module to initialize deployment.
+                </p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                
+                <div class="group relative p-1 bg-gray-900/40 border border-gray-800 hover:border-alien transition-all duration-500 overflow-hidden">
+                    <div class="absolute top-0 left-0 w-full h-[2px] bg-alien shadow-[0_0_20px_#00ff41] transform -translate-y-full group-hover:translate-y-[400px] transition-transform duration-1000 ease-linear opacity-50"></div>
+                    
+                    <div class="bg-black/80 p-8 h-full relative backdrop-blur-sm">
+                        <div class="flex justify-between items-start mb-6">
+                            <div class="p-3 bg-alien/10 border border-alien/30 rounded-sm">
+                                <i data-lucide="code-2" class="text-alien w-8 h-8"></i>
+                            </div>
+                            <span class="text-gray-600 font-mono text-xs">MOD_01</span>
+                        </div>
+                        
+                        <h3 class="text-2xl font-orbitron text-white mb-2 group-hover:text-alien transition-colors">Hyper-Software</h3>
+                        <p class="text-gray-400 text-sm mb-6 leading-relaxed">
+                            Full-cycle engineering from neural architecture to frontend interfaces.
+                        </p>
+
+                        <div class="border-t border-gray-800 pt-4">
+                            <ul class="space-y-2 font-mono text-xs text-gray-500 group-hover:text-gray-300 transition-colors">
+                                <li class="flex items-center gap-2"><span class="text-alien">></span> Custom Web/App Development</li>
+                                <li class="flex items-center gap-2"><span class="text-alien">></span> Blockchain & Web3 Protocols</li>
+                                <li class="flex items-center gap-2"><span class="text-alien">></span> Cloud Infrastructure (AWS/Azure)</li>
+                                <li class="flex items-center gap-2"><span class="text-alien">></span> Legacy System Migration</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="group relative p-1 bg-gray-900/40 border border-gray-800 hover:border-alien transition-all duration-500 overflow-hidden">
+                    <div class="absolute top-0 left-0 w-full h-[2px] bg-alien shadow-[0_0_20px_#00ff41] transform -translate-y-full group-hover:translate-y-[400px] transition-transform duration-1000 ease-linear opacity-50"></div>
+                    
+                    <div class="bg-black/80 p-8 h-full relative backdrop-blur-sm">
+                        <div class="flex justify-between items-start mb-6">
+                            <div class="p-3 bg-alien/10 border border-alien/30 rounded-sm">
+                                <i data-lucide="megaphone" class="text-alien w-8 h-8"></i>
+                            </div>
+                            <span class="text-gray-600 font-mono text-xs">MOD_02</span>
+                        </div>
+                        
+                        <h3 class="text-2xl font-orbitron text-white mb-2 group-hover:text-alien transition-colors">Signal Growth</h3>
+                        <p class="text-gray-400 text-sm mb-6 leading-relaxed">
+                            Aggressive market penetration strategies utilizing data-driven virality.
+                        </p>
+
+                        <div class="border-t border-gray-800 pt-4">
+                            <ul class="space-y-2 font-mono text-xs text-gray-500 group-hover:text-gray-300 transition-colors">
+                                <li class="flex items-center gap-2"><span class="text-alien">></span> SEO & Search Dominance</li>
+                                <li class="flex items-center gap-2"><span class="text-alien">></span> Social Media Management</li>
+                                <li class="flex items-center gap-2"><span class="text-alien">></span> Performance Marketing (PPC)</li>
+                                <li class="flex items-center gap-2"><span class="text-alien">></span> Brand Identity Systems</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="group relative p-1 bg-gray-900/40 border border-gray-800 hover:border-alien transition-all duration-500 overflow-hidden">
+                    <div class="absolute top-0 left-0 w-full h-[2px] bg-alien shadow-[0_0_20px_#00ff41] transform -translate-y-full group-hover:translate-y-[400px] transition-transform duration-1000 ease-linear opacity-50"></div>
+                    
+                    <div class="bg-black/80 p-8 h-full relative backdrop-blur-sm">
+                        <div class="flex justify-between items-start mb-6">
+                            <div class="p-3 bg-alien/10 border border-alien/30 rounded-sm">
+                                <i data-lucide="camera" class="text-alien w-8 h-8"></i>
+                            </div>
+                            <span class="text-gray-600 font-mono text-xs">MOD_03</span>
+                        </div>
+                        
+                        <h3 class="text-2xl font-orbitron text-white mb-2 group-hover:text-alien transition-colors">Visual Capture</h3>
+                        <p class="text-gray-400 text-sm mb-6 leading-relaxed">
+                            Cinematic production and holographic media generation for maximum retention.
+                        </p>
+
+                        <div class="border-t border-gray-800 pt-4">
+                            <ul class="space-y-2 font-mono text-xs text-gray-500 group-hover:text-gray-300 transition-colors">
+                                <li class="flex items-center gap-2"><span class="text-alien">></span> Commercial Ad Shoots</li>
+                                <li class="flex items-center gap-2"><span class="text-alien">></span> Drone / Aerial Cinematography</li>
+                                <li class="flex items-center gap-2"><span class="text-alien">></span> 3D Product Animation</li>
+                                <li class="flex items-center gap-2"><span class="text-alien">></span> Post-Production FX</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="group relative p-1 bg-gray-900/40 border border-gray-800 hover:border-alien transition-all duration-500 overflow-hidden">
+                    <div class="absolute top-0 left-0 w-full h-[2px] bg-alien shadow-[0_0_20px_#00ff41] transform -translate-y-full group-hover:translate-y-[400px] transition-transform duration-1000 ease-linear opacity-50"></div>
+                    
+                    <div class="bg-black/80 p-8 h-full relative backdrop-blur-sm">
+                        <div class="flex justify-between items-start mb-6">
+                            <div class="p-3 bg-alien/10 border border-alien/30 rounded-sm">
+                                <i data-lucide="users" class="text-alien w-8 h-8"></i>
+                            </div>
+                            <span class="text-gray-600 font-mono text-xs">MOD_04</span>
+                        </div>
+                        
+                        <h3 class="text-2xl font-orbitron text-white mb-2 group-hover:text-alien transition-colors">Unit Acquisition</h3>
+                        <p class="text-gray-400 text-sm mb-6 leading-relaxed">
+                            Deploying elite biological and synthetic talent to augment your workforce.
+                        </p>
+
+                        <div class="border-t border-gray-800 pt-4">
+                            <ul class="space-y-2 font-mono text-xs text-gray-500 group-hover:text-gray-300 transition-colors">
+                                <li class="flex items-center gap-2"><span class="text-alien">></span> IT Staff Augmentation</li>
+                                <li class="flex items-center gap-2"><span class="text-alien">></span> Executive Tech Search</li>
+                                <li class="flex items-center gap-2"><span class="text-alien">></span> Remote Team Building</li>
+                                <li class="flex items-center gap-2"><span class="text-alien">></span> Payroll & Compliance</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="group relative p-1 bg-gray-900/40 border border-gray-800 hover:border-alien transition-all duration-500 overflow-hidden">
+                    <div class="absolute top-0 left-0 w-full h-[2px] bg-alien shadow-[0_0_20px_#00ff41] transform -translate-y-full group-hover:translate-y-[400px] transition-transform duration-1000 ease-linear opacity-50"></div>
+                    
+                    <div class="bg-black/80 p-8 h-full relative backdrop-blur-sm">
+                        <div class="flex justify-between items-start mb-6">
+                            <div class="p-3 bg-alien/10 border border-alien/30 rounded-sm">
+                                <i data-lucide="bar-chart-3" class="text-alien w-8 h-8"></i>
+                            </div>
+                            <span class="text-gray-600 font-mono text-xs">MOD_05</span>
+                        </div>
+                        
+                        <h3 class="text-2xl font-orbitron text-white mb-2 group-hover:text-alien transition-colors">Intel Analytics</h3>
+                        <p class="text-gray-400 text-sm mb-6 leading-relaxed">
+                            Deciphering complex data streams to predict future market outcomes.
+                        </p>
+
+                        <div class="border-t border-gray-800 pt-4">
+                            <ul class="space-y-2 font-mono text-xs text-gray-500 group-hover:text-gray-300 transition-colors">
+                                <li class="flex items-center gap-2"><span class="text-alien">></span> Business Intelligence (BI)</li>
+                                <li class="flex items-center gap-2"><span class="text-alien">></span> Big Data Processing</li>
+                                <li class="flex items-center gap-2"><span class="text-alien">></span> Consumer Behavior Analysis</li>
+                                <li class="flex items-center gap-2"><span class="text-alien">></span> Predictive Modeling</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                 <div class="group relative p-1 bg-gray-900/40 border border-gray-800 hover:border-alien transition-all duration-500 overflow-hidden">
+                    <div class="absolute top-0 left-0 w-full h-[2px] bg-alien shadow-[0_0_20px_#00ff41] transform -translate-y-full group-hover:translate-y-[400px] transition-transform duration-1000 ease-linear opacity-50"></div>
+                    
+                    <div class="bg-black/80 p-8 h-full relative backdrop-blur-sm">
+                        <div class="flex justify-between items-start mb-6">
+                            <div class="p-3 bg-alien/10 border border-alien/30 rounded-sm">
+                                <i data-lucide="radio" class="text-alien w-8 h-8"></i>
+                            </div>
+                            <span class="text-gray-600 font-mono text-xs">MOD_06</span>
+                        </div>
+                        
+                        <h3 class="text-2xl font-orbitron text-white mb-2 group-hover:text-alien transition-colors">Command Strategy</h3>
+                        <p class="text-gray-400 text-sm mb-6 leading-relaxed">
+                            High-level consultation for digital transformation and system architecture.
+                        </p>
+
+                        <div class="border-t border-gray-800 pt-4">
+                            <ul class="space-y-2 font-mono text-xs text-gray-500 group-hover:text-gray-300 transition-colors">
+                                <li class="flex items-center gap-2"><span class="text-alien">></span> CTO Advisory</li>
+                                <li class="flex items-center gap-2"><span class="text-alien">></span> Tech Audit & Cleanup</li>
+                                <li class="flex items-center gap-2"><span class="text-alien">></span> Startup Incubation</li>
+                                <li class="flex items-center gap-2"><span class="text-alien">></span> MVP Roadmapping</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </section>
+    <section id="personnel" class="py-24 bg-black border-y border-alien/20 relative overflow-hidden">
+        <div class="absolute top-0 right-0 w-64 h-64 bg-alien/10 blur-[80px]"></div>
+        
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+            <div class="mb-16 border-l-4 border-alien pl-6">
+                <h2 class="text-4xl md:text-6xl font-orbitron font-bold text-white mb-2">SENTIENT <span class="text-alien">ASSETS</span></h2>
+                <p class="text-gray-400 font-mono uppercase tracking-widest">Meet the Minds Behind the Machine</p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+                <div class="group relative bg-gray-900/50 border border-gray-800 hover:border-alien transition-all duration-500 overflow-hidden hover:-translate-y-2">
+                    <div class="hud-corner hud-tl"></div><div class="hud-corner hud-tr"></div>
+                    <div class="hud-corner hud-bl"></div><div class="hud-corner hud-br"></div>
+                    
+                    <div class="h-72 bg-cover bg-center grayscale group-hover:grayscale-0 transition-all duration-700" style="background-image: url('https://images.unsplash.com/photo-1531297461137-36324580e525?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80');">
+                        <div class="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent"></div>
+                    </div>
+                    <div class="p-6 relative z-10 -mt-16 bg-gradient-to-t from-black via-black to-transparent">
+                        <div class="inline-block px-2 py-0.5 bg-alien text-black text-[10px] font-bold font-orbitron mb-2">COMMANDER</div>
+                        <h3 class="text-2xl font-orbitron text-white group-hover:text-alien transition-colors">Unit 734 (Alex)</h3>
+                        <p class="text-xs text-gray-400 font-mono mb-4">CHIEF ARCHITECT</p>
+                        <div class="space-y-2">
+                            <div class="flex justify-between text-[10px] font-mono text-alien"><span>NEURAL NETS</span><span>99%</span></div>
+                            <div class="h-1 w-full bg-gray-800"><div class="h-full bg-alien w-[99%] shadow-[0_0_10px_#00ff41]"></div></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="group relative bg-gray-900/50 border border-gray-800 hover:border-cyan-400 transition-all duration-500 overflow-hidden hover:-translate-y-2">
+                    <div class="h-72 bg-cover bg-center grayscale group-hover:grayscale-0 transition-all duration-700" style="background-image: url('https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80');">
+                        <div class="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent"></div>
+                    </div>
+                    <div class="p-6 relative z-10 -mt-16 bg-gradient-to-t from-black via-black to-transparent">
+                        <div class="inline-block px-2 py-0.5 bg-cyan-500 text-black text-[10px] font-bold font-orbitron mb-2">SPECIALIST</div>
+                        <h3 class="text-2xl font-orbitron text-white group-hover:text-cyan-400 transition-colors">Dr. Elena Void</h3>
+                        <p class="text-xs text-gray-400 font-mono mb-4">QUANTUM CRYPTOGRAPHY</p>
+                        <div class="space-y-2">
+                            <div class="flex justify-between text-[10px] font-mono text-cyan-500"><span>SECURITY</span><span>100%</span></div>
+                            <div class="h-1 w-full bg-gray-800"><div class="h-full bg-cyan-500 w-[100%] shadow-[0_0_10px_cyan]"></div></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="group relative bg-gray-900/50 border border-gray-800 hover:border-purple-500 transition-all duration-500 overflow-hidden hover:-translate-y-2">
+                    <div class="h-72 bg-cover bg-center grayscale group-hover:grayscale-0 transition-all duration-700" style="background-image: url('https://images.unsplash.com/photo-1560250097-0b93528c311a?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80');">
+                        <div class="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent"></div>
+                    </div>
+                    <div class="p-6 relative z-10 -mt-16 bg-gradient-to-t from-black via-black to-transparent">
+                        <div class="inline-block px-2 py-0.5 bg-purple-500 text-black text-[10px] font-bold font-orbitron mb-2">OPERATIVE</div>
+                        <h3 class="text-2xl font-orbitron text-white group-hover:text-purple-500 transition-colors">Marcus Kane</h3>
+                        <p class="text-xs text-gray-400 font-mono mb-4">FULL STACK LEAD</p>
+                        <div class="space-y-2">
+                            <div class="flex justify-between text-[10px] font-mono text-purple-500"><span>SYSTEMS</span><span>96%</span></div>
+                            <div class="h-1 w-full bg-gray-800"><div class="h-full bg-purple-500 w-[96%] shadow-[0_0_10px_purple]"></div></div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="group relative bg-gray-900/50 border border-gray-800 hover:border-red-500 transition-all duration-500 overflow-hidden hover:-translate-y-2">
+                     <div class="h-72 bg-black flex items-center justify-center border-b border-red-500/30">
+                        <i data-lucide="bot" class="w-32 h-32 text-red-500 animate-pulse"></i>
+                    </div>
+                    <div class="p-6 relative z-10 -mt-16 bg-gradient-to-t from-black via-black to-transparent">
+                        <div class="inline-block px-2 py-0.5 bg-red-500 text-black text-[10px] font-bold font-orbitron mb-2">SYNTHETIC</div>
+                        <h3 class="text-2xl font-orbitron text-white group-hover:text-red-500 transition-colors">OMEGA-9</h3>
+                        <p class="text-xs text-gray-400 font-mono mb-4">GENERATIVE INTELLIGENCE</p>
+                        <div class="space-y-2">
+                            <div class="flex justify-between text-[10px] font-mono text-red-500"><span>PROCESSING</span><span>ERROR: INF%</span></div>
+                            <div class="h-1 w-full bg-gray-800"><div class="h-full bg-red-500 w-[100%] animate-pulse"></div></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="py-12 border-b border-alien/20 bg-alien-dark overflow-hidden">
+        <div class="flex gap-12 animate-[scroll_30s_linear_infinite] w-max hover:pause-animation">
+            <span class="text-3xl font-orbitron text-gray-600 hover:text-white transition-colors px-8">CYBERDYNE</span>
+            <span class="text-3xl font-orbitron text-gray-600 hover:text-white transition-colors px-8">NASA_JPL</span>
+            <span class="text-3xl font-orbitron text-gray-600 hover:text-white transition-colors px-8">STARK_IND</span>
+            <span class="text-3xl font-orbitron text-gray-600 hover:text-white transition-colors px-8">UMBRELLA_CORP</span>
+            <span class="text-3xl font-orbitron text-gray-600 hover:text-white transition-colors px-8">WAYNE_ENT</span>
+            <span class="text-3xl font-orbitron text-gray-600 hover:text-white transition-colors px-8">BLACK_MESA</span>
+            <span class="text-3xl font-orbitron text-gray-600 hover:text-white transition-colors px-8">TYRELL</span>
+            <span class="text-3xl font-orbitron text-gray-600 hover:text-white transition-colors px-8">CYBERDYNE</span>
+            <span class="text-3xl font-orbitron text-gray-600 hover:text-white transition-colors px-8">NASA_JPL</span>
+            <span class="text-3xl font-orbitron text-gray-600 hover:text-white transition-colors px-8">STARK_IND</span>
+            <span class="text-3xl font-orbitron text-gray-600 hover:text-white transition-colors px-8">UMBRELLA_CORP</span>
+        </div>
+    </section>
+
+    <section class="py-24 bg-black relative">
+        <div class="max-w-7xl mx-auto px-6">
+            <div class="text-center mb-20">
+                <h2 class="text-5xl font-orbitron font-bold mb-4 text-white">TACTICAL <span class="text-alien">ADVANTAGE</span></h2>
+                <div class="h-1 w-24 bg-alien mx-auto"></div>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-10">
+                <div class="p-8 border border-gray-800 bg-gray-900/30 hover:border-alien transition-all group">
+                    <i data-lucide="zap" class="w-12 h-12 text-alien mb-6 group-hover:scale-110 transition-transform"></i>
+                    <h3 class="text-2xl font-orbitron text-white mb-4">Hyper-Velocity Deployment</h3>
+                    <p class="text-gray-400">We deploy MVPs in weeks, not months. Our proprietary code-generation engines reduce boilerplate by 80%.</p>
+                </div>
+                <div class="p-8 border border-gray-800 bg-gray-900/30 hover:border-alien transition-all group">
+                    <i data-lucide="shield" class="w-12 h-12 text-alien mb-6 group-hover:scale-110 transition-transform"></i>
+                    <h3 class="text-2xl font-orbitron text-white mb-4">Military-Grade Security</h3>
+                    <p class="text-gray-400">Zero-trust architecture integrated from line one. We hack our own systems daily to ensure invulnerability.</p>
+                </div>
+                <div class="p-8 border border-gray-800 bg-gray-900/30 hover:border-alien transition-all group">
+                    <i data-lucide="infinity" class="w-12 h-12 text-alien mb-6 group-hover:scale-110 transition-transform"></i>
+                    <h3 class="text-2xl font-orbitron text-white mb-4">Infinite Scalability</h3>
+                    <p class="text-gray-400">Serverless, edge-computed architectures that handle planetary-scale traffic without blinking.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="py-24 bg-alien-dark border-t border-alien/10">
+        <div class="max-w-7xl mx-auto px-6">
+            <h2 class="text-4xl font-orbitron font-bold mb-12 text-white">MISSION <span class="text-alien">LOGS</span></h2>
+            
+            <div class="space-y-8">
+                <div class="group relative h-[300px] border border-gray-800 overflow-hidden cursor-pointer">
+                    <img src="https://images.unsplash.com/photo-1451187580459-43490279c0fa?ixlib=rb-4.0.3" class="w-full h-full object-cover opacity-50 group-hover:opacity-30 group-hover:scale-105 transition-all duration-700">
+                    <div class="absolute inset-0 flex flex-col justify-center px-12 transition-all">
+                        <div class="transform translate-y-4 group-hover:translate-y-0 transition-transform">
+                            <h3 class="text-4xl font-orbitron text-white font-bold">PROJECT: NEON_FINANCE</h3>
+                            <p class="text-alien font-mono text-lg mt-2 opacity-0 group-hover:opacity-100 transition-opacity delay-100">Web3 Banking Interface • React • Rust</p>
+                            <p class="text-gray-400 mt-4 max-w-2xl opacity-0 group-hover:opacity-100 transition-opacity delay-200">
+                                Redesigned the entire frontend architecture for a global defi exchange, resulting in a 400% increase in transaction throughput.
+                            </p>
+                        </div>
+                    </div>
+                    <div class="absolute bottom-0 w-full h-1 bg-alien transform scale-x-0 group-hover:scale-x-100 transition-transform duration-500"></div>
+                </div>
+
+                <div class="group relative h-[300px] border border-gray-800 overflow-hidden cursor-pointer">
+                    <img src="https://images.unsplash.com/photo-1518770660439-4636190af475?ixlib=rb-4.0.3" class="w-full h-full object-cover opacity-50 group-hover:opacity-30 group-hover:scale-105 transition-all duration-700">
+                    <div class="absolute inset-0 flex flex-col justify-center px-12 transition-all">
+                        <div class="transform translate-y-4 group-hover:translate-y-0 transition-transform">
+                            <h3 class="text-4xl font-orbitron text-white font-bold">PROJECT: AERO_TRACK</h3>
+                            <p class="text-cyan-400 font-mono text-lg mt-2 opacity-0 group-hover:opacity-100 transition-opacity delay-100">IoT Analytics • Python • AWS</p>
+                            <p class="text-gray-400 mt-4 max-w-2xl opacity-0 group-hover:opacity-100 transition-opacity delay-200">
+                                Real-time drone fleet management system processing 5TB of sensor data daily with 99.99% uptime.
+                            </p>
+                        </div>
+                    </div>
+                    <div class="absolute bottom-0 w-full h-1 bg-cyan-400 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-500"></div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="rnd" class="py-24 bg-black relative overflow-hidden">
+        <div class="absolute inset-0" style="background-image: radial-gradient(#00ff41 1px, transparent 1px); background-size: 30px 30px; opacity: 0.1;"></div>
+        
+        <div class="max-w-7xl mx-auto px-6 relative z-10">
+            <div class="flex justify-between items-end mb-12">
+                <h2 class="text-4xl font-orbitron font-bold text-white">ALIENHOUSE <span class="text-purple-500">LABS</span></h2>
+                <span class="text-xs font-mono text-purple-500 border border-purple-500 px-2 py-1 animate-pulse">CLASSIFIED CLEARANCE ONLY</span>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-12">
+                <div class="border border-purple-500/30 p-8 bg-purple-900/5 backdrop-blur-sm relative">
+                    <i data-lucide="flask-conical" class="text-purple-500 w-10 h-10 mb-4"></i>
+                    <h3 class="text-2xl font-orbitron text-white mb-2">Experiment: Neural_Sync</h3>
+                    <p class="text-gray-400 mb-6">Developing direct brain-computer interfaces (BCI) for rapid coding. Developers think, the code appears.</p>
+                    <div class="w-full bg-gray-800 h-2 rounded-full overflow-hidden">
+                        <div class="bg-purple-500 h-full w-[45%] relative overflow-hidden">
+                            <div class="absolute inset-0 bg-white/20 animate-[shimmer_2s_infinite]"></div>
+                        </div>
+                    </div>
+                    <p class="text-right text-xs font-mono text-purple-400 mt-2">PROGRESS: 45%</p>
+                </div>
+                
+                <div class="border border-purple-500/30 p-8 bg-purple-900/5 backdrop-blur-sm relative">
+                    <i data-lucide="box" class="text-purple-500 w-10 h-10 mb-4"></i>
+                    <h3 class="text-2xl font-orbitron text-white mb-2">Experiment: Quantum_Web</h3>
+                    <p class="text-gray-400 mb-6">Post-encryption web protocols utilizing quantum entanglement for instantaneous, unhackable data transfer.</p>
+                    <div class="w-full bg-gray-800 h-2 rounded-full overflow-hidden">
+                        <div class="bg-purple-500 h-full w-[12%] relative overflow-hidden">
+                             <div class="absolute inset-0 bg-white/20 animate-[shimmer_2s_infinite]"></div>
+                        </div>
+                    </div>
+                    <p class="text-right text-xs font-mono text-purple-400 mt-2">PROGRESS: 12%</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="py-20 bg-alien-dark">
+        <div class="max-w-7xl mx-auto px-6">
+            <h2 class="text-3xl font-orbitron text-white mb-10">TRANSMISSIONS (BLOG)</h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <article class="bg-black border border-gray-800 p-6 hover:border-alien transition-colors cursor-pointer">
+                    <span class="text-alien text-xs font-mono">NOV 22, 2025</span>
+                    <h3 class="text-xl font-bold text-white mt-2 mb-4">The End of REST APIs: Why We Moved to Telepathy Protocol</h3>
+                    <a href="#" class="text-gray-400 text-sm hover:text-alien flex items-center gap-2">READ TRANSMISSION <i data-lucide="arrow-right" class="w-4 h-4"></i></a>
+                </article>
+                <article class="bg-black border border-gray-800 p-6 hover:border-alien transition-colors cursor-pointer">
+                    <span class="text-alien text-xs font-mono">NOV 15, 2025</span>
+                    <h3 class="text-xl font-bold text-white mt-2 mb-4">Injecting Nanobots into Legacy Codebases</h3>
+                    <a href="#" class="text-gray-400 text-sm hover:text-alien flex items-center gap-2">READ TRANSMISSION <i data-lucide="arrow-right" class="w-4 h-4"></i></a>
+                </article>
+                <article class="bg-black border border-gray-800 p-6 hover:border-alien transition-colors cursor-pointer">
+                    <span class="text-alien text-xs font-mono">OCT 31, 2025</span>
+                    <h3 class="text-xl font-bold text-white mt-2 mb-4">How to Recruit AI Developers from the Future</h3>
+                    <a href="#" class="text-gray-400 text-sm hover:text-alien flex items-center gap-2">READ TRANSMISSION <i data-lucide="arrow-right" class="w-4 h-4"></i></a>
+                </article>
+            </div>
+        </div>
+    </section>
+
+    <section class="h-[500px] relative w-full border-y border-alien/20">
+        <div class="alien-map w-full h-full absolute inset-0">
+            <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3671.936374639952!2d72.5714!3d23.0225!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zMjPCsDAxJzIxLjAiTiA3MsKwMzQnMTcuMCJF!5e0!3m2!1sen!2sin!4v1625555555555!5m2!1sen!2sin" width="100%" height="100%" style="border:0;" allowfullscreen="" loading="lazy"></iframe>
+        </div>
+        <div class="absolute top-10 left-10 bg-black/90 p-8 border border-alien max-w-md backdrop-blur-md">
+            <h3 class="text-2xl font-orbitron text-white mb-4">EARTH HQ</h3>
+            <p class="text-gray-400 mb-2"><i data-lucide="map-pin" class="inline w-4 h-4 text-alien mr-2"></i> Rajkot, Gujarat, India</p>
+            <p class="text-gray-400 mb-2"><i data-lucide="mail" class="inline w-4 h-4 text-alien mr-2"></i> signal@alienhouse.net</p>
+            <p class="text-gray-400"><i data-lucide="phone" class="inline w-4 h-4 text-alien mr-2"></i> +91 999-999-9999</p>
+        </div>
+    </section>
+
+    <footer class="bg-[#050505] border-t border-alien/20 pt-20 pb-10 font-rajdhani text-sm">
+        <div class="max-w-[1920px] mx-auto px-8">
+            <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-12 mb-16">
+                
+                <div>
+                    <h4 class="text-white font-bold mb-6 text-lg">Capabilities</h4>
+                    <ul class="space-y-3 text-gray-500 font-mono">
+                        <li class="hover:text-alien cursor-pointer">AI & Generative AI</li>
+                        <li class="hover:text-alien cursor-pointer">Cloud Architecture</li>
+                        <li class="hover:text-alien cursor-pointer">Quantum Engineering</li>
+                        <li class="hover:text-alien cursor-pointer">Cybersecurity</li>
+                        <li class="hover:text-alien cursor-pointer">Data & Analytics</li>
+                        <li class="hover:text-alien cursor-pointer">Digital Engineering</li>
+                        <li class="hover:text-alien cursor-pointer">Enterprise Platforms</li>
+                        <li class="hover:text-alien cursor-pointer">Intelligent Ops</li>
+                        <li class="hover:text-alien cursor-pointer">IoT & Physical AI</li>
+                    </ul>
+                </div>
+
+                <div>
+                    <h4 class="text-white font-bold mb-6 text-lg">Industries</h4>
+                    <ul class="space-y-3 text-gray-500 font-mono">
+                        <li class="hover:text-alien cursor-pointer">Aerospace & Defense</li>
+                        <li class="hover:text-alien cursor-pointer">Automotive</li>
+                        <li class="hover:text-alien cursor-pointer">Banking & Finance</li>
+                        <li class="hover:text-alien cursor-pointer">Energy & Utilities</li>
+                        <li class="hover:text-alien cursor-pointer">Life Sciences</li>
+                        <li class="hover:text-alien cursor-pointer">Manufacturing</li>
+                        <li class="hover:text-alien cursor-pointer">Public Sector</li>
+                        <li class="hover:text-alien cursor-pointer">Retail & CPG</li>
+                        <li class="hover:text-alien cursor-pointer">Telecom & Media</li>
+                    </ul>
+                </div>
+
+                <div>
+                    <h4 class="text-white font-bold mb-6 text-lg">About AlienHouse</h4>
+                    <ul class="space-y-3 text-gray-500 font-mono">
+                        <li class="hover:text-alien cursor-pointer">Who We Are</li>
+                        <li class="hover:text-alien cursor-pointer">Leadership</li>
+                        <li class="hover:text-alien cursor-pointer">Sustainability</li>
+                        <li class="hover:text-alien cursor-pointer">Diversity & Inclusion</li>
+                        <li class="hover:text-alien cursor-pointer">Global Locations</li>
+                        <li class="hover:text-alien cursor-pointer">Newsroom</li>
+                        <li class="hover:text-alien cursor-pointer">Investor Relations</li>
+                        <li class="hover:text-alien cursor-pointer">Awards</li>
+                    </ul>
+                </div>
+
+                <div>
+                    <h4 class="text-white font-bold mb-6 text-lg">Resources</h4>
+                    <ul class="space-y-3 text-gray-500 font-mono">
+                        <li class="hover:text-alien cursor-pointer">Case Studies</li>
+                        <li class="hover:text-alien cursor-pointer">White Papers</li>
+                        <li class="hover:text-alien cursor-pointer">Webinars</li>
+                        <li class="hover:text-alien cursor-pointer">Developer Docs</li>
+                        <li class="hover:text-alien cursor-pointer">API Status</li>
+                    </ul>
+                    <h4 class="text-white font-bold mt-8 mb-6 text-lg">Careers</h4>
+                    <ul class="space-y-3 text-gray-500 font-mono">
+                        <li class="hover:text-alien cursor-pointer">Job Search</li>
+                        <li class="hover:text-alien cursor-pointer">Life at AlienHouse</li>
+                        <li class="hover:text-alien cursor-pointer">Alumni Network</li>
+                    </ul>
+                </div>
+
+                <div>
+                    <h4 class="text-white font-bold mb-6 text-lg">Connect</h4>
+                    <div class="flex space-x-4 mb-8">
+                        <a href="#" class="w-10 h-10 rounded border border-gray-700 flex items-center justify-center text-gray-400 hover:border-alien hover:text-alien hover:bg-alien/10 transition-all"><i data-lucide="linkedin"></i></a>
+                        <a href="#" class="w-10 h-10 rounded border border-gray-700 flex items-center justify-center text-gray-400 hover:border-alien hover:text-alien hover:bg-alien/10 transition-all"><i data-lucide="twitter"></i></a>
+                        <a href="#" class="w-10 h-10 rounded border border-gray-700 flex items-center justify-center text-gray-400 hover:border-alien hover:text-alien hover:bg-alien/10 transition-all"><i data-lucide="github"></i></a>
+                        <a href="#" class="w-10 h-10 rounded border border-gray-700 flex items-center justify-center text-gray-400 hover:border-alien hover:text-alien hover:bg-alien/10 transition-all"><i data-lucide="youtube"></i></a>
+                    </div>
+                    <div class="p-4 border border-alien/20 bg-alien/5 rounded">
+                        <p class="text-alien font-bold mb-2">Subscribe to Transmissions</p>
+                        <div class="flex">
+                            <input type="email" placeholder="Email Address" class="bg-black border-b border-gray-600 text-white px-2 py-1 outline-none w-full text-xs">
+                            <button class="text-alien hover:text-white ml-2"><i data-lucide="arrow-right"></i></button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="border-t border-gray-900 pt-8 flex flex-col md:flex-row justify-between items-center text-xs text-gray-600">
+                <div class="flex flex-wrap gap-6 mb-4 md:mb-0">
+                    <a href="#" class="hover:text-alien">Contact Us</a>
+                    <a href="#" class="hover:text-alien">Privacy Statement</a>
+                    <a href="#" class="hover:text-alien">Terms of Use</a>
+                    <a href="#" class="hover:text-alien">Sitemap</a>
+                    <a href="#" class="hover:text-alien">Cookie Policy</a>
+                </div>
+                <p>Copyright © 2025 AlienHouse Networks. Galactic Rights Reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <div id="cookie-banner" class="fixed bottom-0 left-0 w-full bg-black/95 backdrop-blur-lg border-t border-alien/30 p-6 z-[100] transform translate-y-full transition-transform duration-500">
+        <div class="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6">
+            <div class="text-gray-400 text-sm max-w-2xl">
+                <h4 class="text-white font-bold mb-2">WE TRACK SIGNALS</h4>
+                <p>We use cookies and advanced tracking pixels to analyze intergalactic traffic and personalize your experience. By proceeding, you agree to our data harvesting protocols.</p>
+            </div>
+            <div class="flex gap-4">
+                <button onclick="document.getElementById('cookie-banner').style.transform='translateY(100%)'" class="px-6 py-2 border border-gray-600 text-gray-300 hover:text-white text-xs font-bold tracking-widest">
+                    REJECT
+                </button>
+                <button onclick="document.getElementById('cookie-banner').style.transform='translateY(100%)'" class="px-6 py-2 bg-alien text-black hover:bg-white transition-colors text-xs font-bold tracking-widest">
+                    ACCEPT ALL COOKIES
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Initialize Icons
+        lucide.createIcons();
+
+        // --- PARTICLE PHYSICS ENGINE (Optimized) ---
+        const canvas = document.getElementById('particle-canvas');
+        const ctx = canvas.getContext('2d');
+        let particles = [];
+        let width, height;
+        
+        // Mouse force field
+        let mouse = { x: null, y: null, radius: 150 };
+
+        window.addEventListener('resize', resize);
+        window.addEventListener('mousemove', (e) => {
+            mouse.x = e.x;
+            mouse.y = e.y;
+        });
+
+        function resize() {
+            width = canvas.width = window.innerWidth;
+            height = canvas.height = window.innerHeight;
+            initParticles();
+        }
+
+        class Particle {
+            constructor() {
+                this.x = Math.random() * width;
+                this.y = Math.random() * height;
+                this.vx = (Math.random() - 0.5) * 0.5;
+                this.vy = (Math.random() - 0.5) * 0.5;
+                this.size = Math.random() * 1.5;
+                this.baseX = this.x;
+                this.baseY = this.y;
+                this.density = (Math.random() * 30) + 1;
+            }
+
+            update() {
+                // Physics Logic
+                let dx = mouse.x - this.x;
+                let dy = mouse.y - this.y;
+                let distance = Math.sqrt(dx*dx + dy*dy);
+                let forceDirectionX = dx / distance;
+                let forceDirectionY = dy / distance;
+                let maxDistance = mouse.radius;
+                let force = (maxDistance - distance) / maxDistance;
+                let directionX = forceDirectionX * force * this.density;
+                let directionY = forceDirectionY * force * this.density;
+
+                if (distance < mouse.radius) {
+                    this.x -= directionX;
+                    this.y -= directionY;
+                } else {
+                    if (this.x !== this.baseX) {
+                        let dx = this.x - this.baseX;
+                        this.x -= dx/10;
+                    }
+                    if (this.y !== this.baseY) {
+                        let dy = this.y - this.baseY;
+                        this.y -= dy/10;
+                    }
+                }
+            }
+
+            draw() {
+                ctx.fillStyle = '#00ff41';
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fill();
+            }
+        }
+
+        function initParticles() {
+            particles = [];
+            // Calculate density based on screen size
+            let numberOfParticles = (width * height) / 9000;
+            for (let i = 0; i < numberOfParticles; i++) {
+                particles.push(new Particle());
+            }
+        }
+
+        function animate() {
+            ctx.clearRect(0, 0, width, height);
+            for (let i = 0; i < particles.length; i++) {
+                particles[i].update();
+                particles[i].draw();
+                
+                // Draw connections within range
+                for (let j = i; j < particles.length; j++) {
+                    let dx = particles[i].x - particles[j].x;
+                    let dy = particles[i].y - particles[j].y;
+                    let distance = Math.sqrt(dx*dx + dy*dy);
+
+                    if (distance < 100) {
+                        ctx.beginPath();
+                        ctx.strokeStyle = `rgba(0, 255, 65, ${1 - distance/100})`;
+                        ctx.lineWidth = 0.5;
+                        ctx.moveTo(particles[i].x, particles[i].y);
+                        ctx.lineTo(particles[j].x, particles[j].y);
+                        ctx.stroke();
+                    }
+                }
+            }
+            requestAnimationFrame(animate);
+        }
+
+        resize();
+        animate();
+
+        // --- TEXT DECRYPTION EFFECT ---
+        const letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789@#$%^&*";
+        document.querySelectorAll(".decrypt-effect").forEach(element => {
+            let iteration = 0;
+            const originalText = element.dataset.value; // Target text
+            let interval = null;
+
+            // Trigger on hover or scroll
+            const runEffect = () => {
+                clearInterval(interval);
+                interval = setInterval(() => {
+                    element.innerText = originalText
+                        .split("")
+                        .map((letter, index) => {
+                            if(index < iteration) return originalText[index];
+                            return letters[Math.floor(Math.random() * 26)];
+                        })
+                        .join("");
+                    
+                    if(iteration >= originalText.length) clearInterval(interval);
+                    iteration += 1/3;
+                }, 30);
+            };
+
+            // Run once on load
+            setTimeout(runEffect, 1000);
+            element.addEventListener('mouseover', () => { iteration = 0; runEffect(); });
+        });
+
+        // --- COOKIE BANNER DELAY ---
+        setTimeout(() => {
+            document.getElementById('cookie-banner').style.transform = 'translateY(0)';
+        }, 2000);
+
+    </script>
+</body>
+</html>
